@@ -147,7 +147,7 @@ A parallel extension of the dotnet family (Route B: zero changes to the dotnet f
 - EVID_NODE_CFG group landed (5 IDs, appended after the SESS group): SECURITY_SWITCH / RUNTIME_SETTING / MIDDLEWARE_ORDER / SSR_MODE / ERR_HANDLER
 - Reference status ACTIVE: entries #12-18 of the node-audit-pipeline sub-skill comparison table, fullstack-audit-pipeline Phase 6, and the agent matrix have all been upgraded to "P2 delivered"
 - Final wrap-up (2026-08-23): all P2 deliveries passed the final whole-branch review (rev-final-p2 ✅ / PASS-with-minors, 6/6 checks PASS); the 2 Minors from the T2+T3 review (taint-linker consumer path prefix, specialty name wording) and the 10 Minors from the T4+T5 review (evidence reference bidirectional consistency, etc.) were all fixed and closed (commits 3924e47 / 6ac9416); 4 PARK observation-item FIXes landed + 6 items remain registered (commit b44b878); 15 commits for the whole chain (072132a→3924e47), **zero changes to the dotnet family**
-- **Skill registration ledger mechanism + capability gap backfill (2026-09-14)**: added `docs/NewSkillRegistration.md` governance ledger (mechanism merge gate + four dispositions + state machine); delivered 5 new specialties per the ledger (dotnet-query-injection / dotnet-spreadsheet-export / dotnet-ai-prompt / node-spreadsheet-export / node-ai-prompt); 5 existing extensions and 6 negative dispositions registered as pending/observe.
+- **Skill registration ledger mechanism + capability gap backfill (2026-09-14)**: added a Skill registration governance ledger (mechanism merge gate + four dispositions + state machine); delivered 5 new specialties per the ledger (dotnet-query-injection / dotnet-spreadsheet-export / dotnet-ai-prompt / node-spreadsheet-export / node-ai-prompt); 5 existing extensions and 6 negative dispositions registered as pending/observe.
 - **Existing skill mechanism extensions landed (2026-09-14 extension round)**: delivered 5 mechanism extensions per the ledger (account enumeration / audit integrity + availability / signed-request replay protection / configuration exposure + response information disclosure / integer overflow), covering 11 existing skills (6 dotnet files + 5 node files) with a "Mechanism Extensions" section appended at the end of each; 30 new evidence points added to the EVID dictionary (new NODE_AUTH group); all statuses capped at "implemented, pending verification".
 - **Design-intent collection mechanism (2026-09-16, option A)**: both pipelines add Phase 0.7 (fail-open), distilling a `design_intent` six-section intent summary from the target repository's superpowers artifacts (docs/superpowers, docs/design, .superpowers/sdd); evidence layering rules added to `AUDIT_EXECUTION_COMMON.md` §9 (intent-layer references are forbidden as EVID citations; conflicts resolved in favor of code); logic-audit / auth-audit on both stacks are the first batch integrated (one input-dependency rule + one enumeration rule each); no new skills, no new EVID IDs.
 
@@ -719,7 +719,7 @@ The above constraints have been synced to:
 - `skills/shared/IO_PATH_CONVENTION.md`
 - `skills/shared/DOTNET_ROUTE_OUTPUT_TEMPLATES.md`
 
-This round made nine categories of structural enhancements to the .NET skill library (see `docs/memory/CHANGELOG_AND_DECISIONS.md` for details):
+This round made nine categories of structural enhancements to the .NET skill library:
 
 1. All framework specialties upgraded to the same three-layer structure as vulnerability specialties
 2. dotnet-route-tracer upgraded to an execution-level chain tracing specification
@@ -960,7 +960,7 @@ dotnet-audit-pipeline now clearly specifies:
 
 After this strengthening, dotnet-audit-pipeline is no longer just an "aggregation description", but the true coordination entry of the entire .NET skill library.
 
-> 📋 Second-round enhancement details have been moved to `docs/memory/CHANGELOG_AND_DECISIONS.md`
+> 📋 Detailed records of the second-round enhancements are omitted here
 
 ## July 2026 CodeGraph Integration Enhancement (After Round 27)
 
@@ -1118,7 +1118,7 @@ This refactoring passed cross-file consistency checks:
 
 ## Round 41 Category-A Quick Fixes (2026-09-18)
 
-Based on `docs/2026-09-18-real-audit-verification-playback-and-fix-plan.md` and a colleague's real-run playback, 6 existing shared-contract defects received quick fixes (small template/script changes, no new mechanisms):
+Based on real-audit verification playback and colleague feedback, 6 existing shared-contract defects received quick fixes (small template/script changes, no new mechanisms):
 
 1. **P0-1 route count self-check**: the route output template adds the routes count reconciliation section and the checkpoint count self-check gate; route-mapper must persist it
 2. **P0-2 dual-field count criteria unification**: the IO convention and dual-stack route templates enforce the `unique` / `method_path_count` dual-field criteria; the contract-mapper three-bucket denominator locks on `method_path_count`
@@ -1136,7 +1136,7 @@ Based on `docs/2026-09-18-real-audit-verification-playback-and-fix-plan.md` and 
 
 ## Round 42 Category-B Mechanism Extensions (2026-09-18)
 
-Based on `docs/superpowers/specs/2026-09-18-b-class-mechanism-extensions-design.md` and the "register first, implement later" convention, all 7 items of the Category-B mechanism extension batch are integrated into existing skills / pipelines without adding directories (16 implementation commits + 3 review supplements + wrap-up; 7 ledger items flipped to "implemented, pending verification"):
+Following the "register first, implement later" convention, all 7 items of the Category-B mechanism extension batch are integrated into existing skills / pipelines without adding directories (16 implementation commits + 3 review supplements + wrap-up; 7 ledger items flipped to "implemented, pending verification"):
 
 1. **P1-4 Phase 0.7 recursive probing + negative-conclusion recheck**: design_intent probing switched to recursive globs (`**/docs/superpowers/`, `**/.superpowers/sdd/`, `**/docs/design/`); sub-pipelines perform a cheap independent recheck of "not found" negative conclusions; artifacts add a `search_scope` self-evidence block (§9 supplementary rules ⑤⑥; positive conclusions do not require a recheck)
 2. **P2-12 intent-source whitelist extension**: ADR/RFC-type decision directories added to the configurable intent-source whitelist, with the same six-section summary distillation; red lines unchanged
@@ -1155,7 +1155,7 @@ Based on `docs/superpowers/specs/2026-09-18-b-class-mechanism-extensions-design.
 
 ## Round 43 Category-C Architectural First Item (2026-09-19 node-feature-api-mapper Feature↔API Mapping Layer)
 
-Based on `docs/superpowers/specs/2026-09-19-node-feature-api-mapper-design.md` and the 2026-09-19 brainstorming kickoff (all three decisions took option A), the first of the 3 Category-C architectural items, P2-9 feature↔API mapping layer, completed spec→plan→SDD delivery in four batches (skill body → consumer integration → pipeline integration → wrap-up):
+Following the 2026-09-19 brainstorming kickoff (all three decisions took option A), the first of the 3 Category-C architectural items, P2-9 feature↔API mapping layer, completed spec→plan→SDD delivery in four batches (skill body → consumer integration → pipeline integration → wrap-up):
 
 1. **New `node-feature-api-mapper`**: three-layer mapping of feature surface → endpoints → backend route_id (SPA route table extension / component-tree import reverse index ≤6 levels / client method → endpoint reusing the frontend_outbound rg rules); three whitelist penetration modes penetrating one layer; three-class mandatory fallback for broken links (silent dropping forbidden; PARTIAL remapping loop); artifact `feature_api_map_{timestamp}.md` (four mandatory header fields + three-section template); pure-BFF projects without an SPA fail-open with `NOT_APPLICABLE` probe evidence
 2. **Consumer integration**: node-logic-audit "feature-surface organization determination", node-auth-audit "feature view priority (export / delete / bulk / tenant / credential endpoints go straight to P0)", dotnet-route-tracer traces_index adds a `feature` column (fullstack reverse-lookup of feature_api_map; single-stack controller-domain heuristic, annotated as non-evidence)
@@ -1172,7 +1172,7 @@ Based on `docs/superpowers/specs/2026-09-19-node-feature-api-mapper-design.md` a
 
 ## Round 44 Category-C Architectural Second Item (2026-09-19 DYNAMIC_VERIFY(STATIC_UNIT) Dynamic Verification Phase, P2-10)
 
-Based on `docs/superpowers/specs/2026-09-19-dynamic-verify-unit-design.md`, the second of the 3 Category-C architectural items, P2-10 dynamic verification phase, completed spec→plan→SDD delivery in three batches (schema + shared template → dual pipeline Phase 7 + semantic linkage → wrap-up):
+The second of the 3 Category-C architectural items, P2-10 dynamic verification phase, completed spec→plan→SDD delivery in three batches (schema + shared template → dual pipeline Phase 7 + semantic linkage → wrap-up):
 
 1. **pending_pool schema extension**: "Closure Method" three-value enum (`static-evidence` / `dynamic-unit` / `needs-env`) + entry status enum (`OPEN` / `DYNAMIC_VERIFIED`) + status bucket counts (`open_count` / `dynamic_verified_count`, `pool_total` scope unchanged) + heuristic inference for historical artifacts (`skills/shared/IO_PATH_CONVENTION.md`)
 2. **New `skills/shared/DYNAMIC_VERIFY_UNIT_TEMPLATE.md`**: four-zero red-line self-check (zero credentials / zero network / zero services / zero writes outside the scratch directory) + dotnet xunit / node vitest dual test project skeletons (copy-don't-reference) + run and write-back protocol
@@ -1206,7 +1206,7 @@ Based on the artifacts of run `api-main_2026_09_20_10_38` (`temp/apccr_fullstack
 
 ## Round 45 (2026-09-20 Defect Fix Batch, 17 Defects Delivered in 3 Batches via SDD)
 
-Based on `docs/superpowers/specs/2026-09-20-defect-fix-batch-design.md`, the 5 playback failures + 12 colleague feedback items merged into 17 defects, delivered spec→plan→SDD in three batches (two-stage review between batches ×3 all passed + 2 review leftover supplement sentences each in an independent commit):
+The 5 playback failures + 12 colleague feedback items were merged into 17 defects, delivered spec→plan→SDD in three batches (two-stage review between batches ×3 all passed + 2 review leftover supplement sentences each in an independent commit):
 
 1. **Batch 1 count and criteria closure**: pending_pool one ID per row, alias merging forbidden + three formulas solidified (`pool_total` = unique pool_id count / statistics table count = detail enumeration count / closed = sum of non-false-positive non-pending items) + final_anchor three machine-verification lines + `run_timestamp` unified fullstack issuance to both stacks + SEVERITY rating enum closure C/H/M/L (range values forbidden; upgrade-channel annotation "suggest upgrade to M")
 2. **Batch 2 process gap fixes**: stack_detect sub-pipeline mandatory delivery + end-of-Phase-0 Test-Path checklist (missing item = BLOCKED) + shared index single-writer principle (sharded naming, merging by orchestration layer) + "pool rows precede references" mandatory clause + Phase 0 preflight environment check (`preflight_{timestamp}.md` dual stacks) + wait-timeout quantified formula (estimated minutes = 2 + (total files / 1000) × 8) + Phase 6 P2 hidden-surface trace executed directly by the orchestration layer + node-route-mapper method-level pairing mandatory (conservative dual-method upper bound forbidden from flowing downstream)
@@ -1224,7 +1224,7 @@ Based on `docs/superpowers/specs/2026-09-20-defect-fix-batch-design.md`, the 5 p
 
 ## Round 46 (2026-09-21 Review Fix Batch, Driven by Three Independent Pre-Packaging Reviews)
 
-Based on `docs/superpowers/specs/2026-09-21-review-fix-batch-design.md`, three independent pre-packaging reviews (design soundness / landing authenticity / consistency regression) exposed 20 gaps (2 high, 8 medium, 10 low), delivered spec→SDD in two batches (inter-batch review: snapshot-ledger consistency self-check A8/B11 fully reconciled + no-op check passed):
+Three independent pre-packaging reviews (design soundness / landing authenticity / consistency regression) exposed 20 gaps (2 high, 8 medium, 10 low), delivered spec→SDD in two batches (inter-batch review: snapshot-ledger consistency self-check A8/B11 fully reconciled + no-op check passed):
 
 1. **Batch 1 execution-loop breakpoint fixes**: dimension list in-package snapshot (IO_PATH_CONVENTION appendix A8+B9, dual-track execution source / registration source) + dual-mode sub-stack run_timestamp handling (fullstack orchestration mode receives the issued value without self-producing / single-stack mode self-produces, closing the dual-timestamp revival hole) + BLOCKED recovery loop single-stack broken-ring fix (end-of-Phase-0 checklist gains dual-mode recovery actions) + manifest mapping table format registration + milestone-line timestamp pinned to run_timestamp + formula ③ chain status criteria registration (closed/open/false_positive/pending four-state mapping table) + final_anchor three machine-verification fields + preflight artifact template
 2. **Batch 2 dimension list in-packaging + record-layer polish**: snapshot registration of B10/B11 + completeness criteria sentence / unmapped landing normalization (uncertain methods go into the frontend_outbound self-contained list section, forbidden from being written into unmapped_routes) / pending-pool CLOSED enum (closed within static audit or this phase) + closed_count bucket merging / frontend_outbound IO path source-of-truth registration (route_mapping artifact table adds a row) / Option A discipline exclusion clause (rg zero hits are non asset-existence conclusions; one line added to each of the 4 agents) / wait-timeout rounding rule (no rounding during computation, round to the nearest minute at the end) + total-file-count GC6 scope / preflight cascade rules registration / SEVERITY rating statistics grouping by enum value / chain status name alignment (pending ↔ open synonymous and same-set) / node pipeline single-stack dimension verification reference sentence / maintenance log + CHANGELOG record-layer corrections (defect count 16 criteria)
