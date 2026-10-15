@@ -11,8 +11,6 @@ The project covers ASP.NET Core, ASP.NET MVC, ASP.NET Web API, Blazor, SignalR, 
 
 > 🔁 **Project lineage**: This repository is the result of multiple rounds of refinement over [dotnet-security-audit-skill](https://github.com/ZMR0zhangmouren/dotnet-security-audit-skill). The earlier version covered only the .NET stack, with incomplete evidence tracing, coverage gates, and evidence review. This version adds full Node.js and fullstack frontend-backend audit capabilities, and fully implements the evidence contract, coverage gates, and quality review workflow. The old repository is kept for archival purposes only — new users should use this repository.
 
-> 📖 **First-time deployment and usage, please read: [docs/Initialization_and_Usage_Guide.md](docs/Initialization_and_Usage_Guide.md)** (deployment steps, three coverage modes, resume-from-breakpoint, gate acceptance, regression test plan)
-
 ## Project Features
 
 - Evidence-contract driven: the EVID_* evidence points output by dotnet-route-tracer serve as the hard gate for most sub-audit skills
