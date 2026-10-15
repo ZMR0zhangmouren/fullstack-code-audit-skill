@@ -1,0 +1,135 @@
+---
+name: node-expr-audit
+description: Node.js expression injection audit tool. Identifies evaluation and sandbox escape risks in expr-eval, mathjs.evaluate, jexl, jsonata, vm.runInNewContext, and new Function; outputs exploitability rating, PoC, and remediation recommendations.
+---
+
+# Node.js Expression Injection Audit
+
+## Shared Grabber Index Reference
+
+- By default, use `shared/NODE_AUDIT_GRABBER_INDEX.md` as the basic retrieval index for this skill
+- By default, use `shared/NODE_SINK_REFERENCE.md` as the baseline for this specialty's Sink type definitions and trace-gate validation
+- **By default, follow the general execution standard in `shared/DOTNET_AUDIT_EXECUTION_STANDARD.md` (two-phase determination, fail-close determination, hit ID conventions, testing requirements)**
+- By default, use `shared/SEVERITY_RATING.md` as the severity rating and ID convention baseline
+- By default, use `shared/IO_PATH_CONVENTION.md` as the artifact path and naming convention
+- Enumeration must at least cover the shared grabbers related to expression engines, evaluation entry points, sandbox configuration, rule engines, and calculation formulas
+- If the project has secondary encapsulations such as RuleEngine, FormulaService, ExpressionEvaluator, or ConditionParser, they must be added to the project-internal grabbers section of the output
+- When this skill's specialty enumeration rules are finer-grained than the shared index, this skill takes precedence, but the shared index's basic coverage must not be reduced
+
+## Input Dependencies
+
+- Required: `node_source_path`
+- Optional: `node/route_mapping/routes_{timestamp}.md` and `node/route_mapping/params_{timestamp}.md` (used to align expression entries, parameter bindings, and `route_id`)
+- Optional: `node/route_mapping/middleware_inventory_{timestamp}.md` (used to confirm middleware coverage order and short-circuit conditions)
+- Optional: `node/auth_audit/auth_mapping_{timestamp}.md` (used to supplement anonymous entries, P0/P1 bucketing, authentication boundaries, or business preconditions)
+- Optional: `node/framework_audit/*_{timestamp}.md` (used to supplement the host, rule engine registration, and runtime control plane)
+- Optional: `cross/api_contract_map_{timestamp}.md` (used for cross-stack parameter sources, field mappings, and upstream/downstream linkage analysis)
+- This specialty is **trace-gate**: primarily consume `node/route_tracer/{route_id}/trace_{timestamp}.md`; if `node/route_tracer/{route_id}/trace_summary_{timestamp}.md` exists, it may serve as a summary index
+- If executed via `dotnet-audit-pipeline` (Node.js extension mode), the `route_id` referenced by this specialty should be consistent with `node/cross_analysis/high_risk_routes_{timestamp}.md`
+
+## Key Checks
+
+- expr-eval: `Parser.evaluate(expr)` / `new Parser({ functions })` — built-in function whitelist and custom function configuration
+- mathjs: `math.evaluate(expr, scope)` — `constructor` chain bypass history and scope exposure surface
+- jexl: `jexl.eval(expr, context)` — property chain access can reach objects beyond the context along the prototype chain
+- jsonata: `jsonata(expr).evaluate(input)` — expression capability surface and input data reachability
+- `vm.runInNewContext` / `vm.runInContext`: not a safe sandbox; escape via `this.constructor.constructor('return process')()`
+- `new Function(expr)` / `eval(expr)` / `setTimeout(string)` directly evaluating untrusted input
+- Business entries: rule engines, report formulas, marketing conditions, calculator endpoints, custom filters, and sorting configuration
+- Evaluation results entering sensitive semantics (SQL queries, file operations, permission checks) and error stack leakage
+
+## Enumeration Rules (Mandatory Refinement)
+
+- Enumerate with rg: `expr-eval`, `Parser\.evaluate|parser\.evaluate`, `mathjs|math\.evaluate`, `jexl|jexl\.eval`, `jsonata`, `vm\.runInNewContext|vm\.runInContext`, `new Function\(`, `eval\(`, `setTimeout\(['"]`
+- Enumerate expression sources (request parameters / database-stored configuration / admin backends) at entries such as rule configuration, formula calculation, and expression filtering
+- For each evaluation point record: engine, expression source, sandbox / function whitelist configuration, context exposed objects, and evaluation result flow
+- Distinguish "fully controllable expression evaluation" from "fixed template + numeric parameter slots"
+- For `vm` scenarios, the context object content must be recorded and the `constructor` chain escape surface assessed
+- If a secondary-encapsulation rule engine exists, it must be unwrapped layer by layer to the real evaluation call sites
+
+## Barrier Verification Matrix (Mandatory)
+
+| Barrier Type | Typical Implementation | Verification Action | Determination Criteria |
+| ---- | ---- | ---- | ---- |
+| Expression string controllability | `Parser.evaluate(userInput)` / `vm.runInNewContext(concatenated string)` | Read the expression construction source, confirming whether it comes from user input | user input entering evaluation directly → 🔴 high risk; fixed template + numeric parameter slots → 🟠 parameter-slot boundary to be confirmed |
+| Function whitelist | expr-eval `{ functions: {...} }`, mathjs `math.import` restrictions | Read the whitelist configuration source, confirming whether dangerous functions are reachable and whether unknown symbols error | fail-close whitelist → ✅ safe; blacklist or default full set → 🔴 high risk; configuration not visible → ⚠️ to be confirmed |
+| Pre-evaluation validation | Syntax / length / AST structure validation | Confirm whether whitelist or structural validation exists before evaluation and whether the validator is fail-close | fail-close validation → ✅ safe; length-only restriction → ⚠️ bypassable; no validation → 🔴 high risk |
+| Sandbox isolation | `vm.runInNewContext(code, ctx)` | Node vm is not a safe sandbox; check whether ctx exposes objects reachable via the `constructor` chain | using vm for untrusted input → 🔴 high risk (escapable); trusted code only → 🟠 to be confirmed |
+| Context exposure surface | jexl context / mathjs scope | Check whether the passed object is frozen and whether it contains sensitive objects such as `process` / db / exec | minimized and frozen → 🟠 low-risk surface; sensitive objects exposed → 🔴 high risk |
+| Evaluation result sensitive semantics | Results entering SQL / files / permission checks | Trace the flow of evaluation results | entering sensitive semantics → 🔴 high-risk amplification; numeric calculation without echo → 🟠 to be confirmed |
+
+## Two-Phase Determination (Mandatory)
+
+This specialty follows the two-phase determination process in `shared/DOTNET_AUDIT_EXECUTION_STANDARD.md`:
+
+> The general execution standard takes `shared/AUDIT_EXECUTION_COMMON.md` as its source of truth (shared evolution decision 3); this section retains node-stack-specific differences.
+
+### Phase 1: Interim Conclusion
+
+For each hit, first give one of three interim conclusions:
+
+- `Confirmed Vulnerability Candidate`: externally controllable input appears to enter expression evaluation or in-sandbox execution
+- `Pending`: the context shows a suspicious pattern, but the external input source, barrier behavior, or call chain is unclear
+- `False Positive`: the input comes from fixed constants / enum mappings, or the barrier has been verified as fail-close
+
+### Phase 2: Mandatory Evidence Chasing
+
+If Phase 1 is "Pending", you must continue chasing at least one more hop of the call chain or downstream parser until any of the following holds:
+
+- Evidence is found that externally controllable input enters the Sink position → `Confirmed Vulnerability`
+- Fixed whitelist mapping / fail-close evidence is found → `False Positive`
+- A key call chain is still missing → remain `Pending`, but you must state which hop is missing
+
+**fail-close semantics**: barriers, whitelists, validators, and filters must be evaluated in their failure mode. Unknown / illegal input must throw an exception, return empty, refuse execution, or trigger a log alert — it must never pass through the raw value; any silent-fallback or fail-open behavior is treated as high risk.
+
+## Determination Rules (Mandatory Refinement)
+
+### Confirmed
+
+- `EVID_NODE_EXPR_EVALUATE_POINT` + `EVID_NODE_EXPR_STRING_CONCAT` + no effective `EVID_NODE_EXPR_SANDBOX_CONFIG`
+- Untrusted input enters `vm.runInNewContext` / `new Function` / `eval` evaluation directly
+- jexl / mathjs reach dangerous objects such as `process` via the `constructor` chain or context prototype access, and the whitelist is fail-open
+- Evaluation results enter sensitive semantics such as SQL / files / permission checks, and the expression is controllable
+
+### ⚠️Pending Verification
+
+- The context shows a suspicious pattern (e.g., a `Parser.evaluate` call), but the external input source is unclear (trace or call chain needs to be supplemented)
+- Sandbox / whitelist configuration exists, but whether the current branch invokes it and whether the configuration takes effect cannot be confirmed
+- Expression sources are complex (database-stored configuration / cache / admin backend), and whether they can be influenced by users cannot be confirmed
+
+### False Positive
+
+- Expressions come from fixed constants / enum mappings, and unknown input is refused execution (fail-close)
+- User input enters only numeric parameter slots, the expression structure is fully fixed, and there is no string interpolation
+- The evaluation engine is configured with a fail-close function whitelist, and the context exposes no sensitive objects
+
+## Testing Recommendations (Mandatory)
+
+### Positive Testing
+
+- Construct expression escape payloads: `constructor.constructor('return process')().exit()`, jexl prototype chain access, mathjs `import` attempts
+- Verify arbitrary expression execution holds under fully controllable expression evaluation
+- Test cases carry a `test_id` associated with the hit ID
+
+### Negative Testing
+
+- Construct inputs intercepted by barriers: out-of-whitelist functions, illegal syntax, overlong expressions
+- Verify unknown symbols error instead of silently executing under a fail-close whitelist
+- Verify prototype chain access is blocked under a frozen context
+
+### Regression Testing
+
+- Retest after remediation, confirming whitelist and context minimization remain effective
+- Retest after upgrading expr-eval / mathjs / jexl versions, confirming default sandbox behavior has not changed
+- Verify newly added rule configuration entries still go through the unified evaluation wrapper
+
+## Evidence References
+
+- `EVID_NODE_EXPR_EVALUATE_POINT`
+- `EVID_NODE_EXPR_STRING_CONCAT`
+- `EVID_NODE_EXPR_SANDBOX_CONFIG`
+
+## Output
+
+- `node/vuln_audit/expr_{timestamp}.md`
+- `node/vuln_poc/expr_{timestamp}.md` (Confirmed / Pending Verification / Environment-Dependent PoC)
