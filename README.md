@@ -9,6 +9,8 @@ This repository is a collection of white-box code security audit skills for the 
 
 The project covers ASP.NET Core, ASP.NET MVC, ASP.NET Web API, Blazor, SignalR, GraphQL, WCF, and common class-library scenarios; the Node.js side covers Express, Koa, Fastify, Next.js, Nuxt, NestJS, and GraphQL, and supports fullstack (stack_mode=BOTH) audits. It is suitable for source-code audits, fix verification, and regression analysis under the premise of legitimate authorization.
 
+> 🔁 **Project lineage**: This repository is the result of multiple rounds of refinement over [dotnet-security-audit-skill](https://github.com/ZMR0zhangmouren/dotnet-security-audit-skill). The earlier version covered only the .NET stack, with incomplete evidence tracing, coverage gates, and evidence review. This version adds full Node.js and fullstack frontend-backend audit capabilities, and fully implements the evidence contract, coverage gates, and quality review workflow. The old repository is kept for archival purposes only — new users should use this repository.
+
 > 📖 **First-time deployment and usage, please read: [docs/Initialization_and_Usage_Guide.md](docs/Initialization_and_Usage_Guide.md)** (deployment steps, three coverage modes, resume-from-breakpoint, gate acceptance, regression test plan)
 
 ## Project Features
